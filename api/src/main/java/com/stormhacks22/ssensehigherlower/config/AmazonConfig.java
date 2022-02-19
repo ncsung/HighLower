@@ -3,6 +3,7 @@ package com.stormhacks22.ssensehigherlower.config;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,14 +21,12 @@ public class AmazonConfig {
     // S3 client
     @Bean
     public AmazonS3 s3() {
-        AWSCredentials awsCredentials = new BasicAWSCredentials(
-                this.accessKey,
-                this.secretKey
-        );
+        AWSCredentials awsCredentials = new BasicAWSCredentials(this.accessKey,this.secretKey);
 
         return AmazonS3ClientBuilder
                 .standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                .withRegion(Regions.DEFAULT_REGION)
                 .build();
     }
 }
