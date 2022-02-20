@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("api/test")
+@RequestMapping("api/items")
 @CrossOrigin("*")
 public class HigherLowerController {
 
@@ -19,6 +20,11 @@ public class HigherLowerController {
     }
 
     @GetMapping
+    public Map<String, Map<String, String>> getBucketMetadata() {
+        return higherLowerService.getBucketMetadata();
+    }
+
+    @GetMapping("/summary")
     public List<S3ObjectSummary> getBucketItems() {
         return higherLowerService.getBucketItems();
     }
@@ -28,12 +34,6 @@ public class HigherLowerController {
         return higherLowerService.downloadImage(imageKey);
     }
 
-    @GetMapping("/metadata")
-    public void getBucketMetadata() {
-        higherLowerService.getBucketMetadata();
-    }
 
-//    @GetMapping("{imageKey/metadata")
-//    public
 
 }

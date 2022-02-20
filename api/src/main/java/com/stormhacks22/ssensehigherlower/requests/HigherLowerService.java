@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class HigherLowerService {
@@ -18,24 +19,18 @@ public class HigherLowerService {
         this.fileStore = fileStore;
     }
 
+    // The key/filename is provided to the frontend via a GET request, and when the frontend needs the associated picture, it gives it back
     public byte[] downloadImage(String imageKey) {
-//        // TODO: Figure out what the right input parameter should be
-//        String path = String.format("%s/%s",
-//                BucketName.PROFILE_IMAGE.getBucketName(),
-//                imageKey);
-
         String path = BucketName.PROFILE_IMAGE.getBucketName();
 
         return fileStore.download(path, imageKey);
     }
 
-    // User hits this with some information...
     public List<S3ObjectSummary> getBucketItems() {
-
-        return fileStore.getBucketItems();
+        return fileStore.getBucketItems(BucketName.PROFILE_IMAGE.getBucketName());
     }
 
-    public void getBucketMetadata() {
-        fileStore.getBucketMetadata();
+    public Map<String, Map<String, String>> getBucketMetadata() {
+        return fileStore.getBucketMetadata(BucketName.PROFILE_IMAGE.getBucketName());
     }
 }

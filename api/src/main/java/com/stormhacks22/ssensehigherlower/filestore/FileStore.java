@@ -9,11 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 
 @Service
 public class FileStore {
@@ -56,8 +52,8 @@ public class FileStore {
     }
 
     // Get a summary of all bucket items
-    public List<S3ObjectSummary> getBucketItems() {
-        ObjectListing listing = s3.listObjects(BucketName.PROFILE_IMAGE.getBucketName());
+    public List<S3ObjectSummary> getBucketItems(String bucketName) {
+        ObjectListing listing = s3.listObjects(bucketName);
         List<S3ObjectSummary> summaries = listing.getObjectSummaries();
 
 
@@ -69,28 +65,31 @@ public class FileStore {
         return summaries;
     }
 
-    public void getBucketMetadata() {
-
-        TreeMap<String, String> metadata;
-
+    public Map<String, Map<String, String>> getBucketMetadata(String bucketName) {
+        // Imitates a JSON nested structure
+        //  String: filename
+        //      Map<String, String>: key (brand/item-name/price), value pairs
+        Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
 
         ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-                .withBucketName(BucketName.PROFILE_IMAGE.getBucketName());
+                .withBucketName(bucketName);
         ObjectListing objectListing;
         do {
             objectListing = s3.listObjects(listObjectsRequest);
             for (S3ObjectSummary objectSummary
                     : objectListing.getObjectSummaries()) {
+
+                String imageKey = objectSummary.getKey();
+
                 /** To get user defined metadata **/
-                ObjectMetadata objectMetadata = s3.getObjectMetadata(BucketName.PROFILE_IMAGE.getBucketName(), objectSummary.getKey());
-                Map userMetadataMap = objectMetadata.getUserMetadata();
-                System.out.println(objectSummary.getKey());
-                System.out.println(userMetadataMap);
-//                Map rowMetadataMap = objectMetadata.getRawMetadata();
+                ObjectMetadata objectMetadata = s3.getObjectMetadata(BucketName.PROFILE_IMAGE.getBucketName(), imageKey);
+                Map userMetadataMap = objectMetadata.getUserMetadata(); // Brand, item-name, price
+                map.put(imageKey, userMetadataMap);
+
             }
             listObjectsRequest.setMarker(objectListing.getNextMarker());
         } while (objectListing.isTruncated());
 
-
+        return map;
     }
 }
