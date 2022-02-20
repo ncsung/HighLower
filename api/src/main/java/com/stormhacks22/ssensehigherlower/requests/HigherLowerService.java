@@ -34,4 +34,8 @@ public class HigherLowerService {
 
         return fileStore.getBucketItems();
     }
+
+    public void getBucketMetadata() {
+        fileStore.getBucketMetadata();
+    }
 }

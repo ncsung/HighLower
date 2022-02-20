@@ -28,4 +28,12 @@ public class HigherLowerController {
         return higherLowerService.downloadImage(imageKey);
     }
 
+    @GetMapping("/metadata")
+    public void getBucketMetadata() {
+        higherLowerService.getBucketMetadata();
+    }
+
+//    @GetMapping("{imageKey/metadata")
+//    public
+
 }
