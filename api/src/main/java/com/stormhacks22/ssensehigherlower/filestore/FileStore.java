@@ -2,13 +2,14 @@ package com.stormhacks22.ssensehigherlower.filestore;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.*;
+import com.amazonaws.util.IOUtils;
+import com.stormhacks22.ssensehigherlower.bucket.BucketName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class FileStore {
@@ -20,24 +21,75 @@ public class FileStore {
         this.s3 = s3;
     }
 
-    public void save(String filepath,
-                     String filename,
-                     Optional<Map<String, String>> optionalMetadata,
-                     InputStream inputStream) {
+//    public void save(String filepath,
+//                     String filename,
+//                     Optional<Map<String, String>> optionalMetadata,
+//                     InputStream inputStream) {
+//
+//        // User can optionally provide metadata with the file
+//        ObjectMetadata objectMetadata = new ObjectMetadata();
+//        optionalMetadata.ifPresent(map -> {
+//            if (!map.isEmpty()) {
+//                map.forEach((key, value) -> objectMetadata.addUserMetadata(key, value));
+//            }
+//        });
+//
+//        try {
+//            s3.putObject(filepath, filename, inputStream, objectMetadata);
+//        } catch (AmazonServiceException e) {
+//            throw new IllegalStateException("Failed to upload content to s3.", e);
+//        }
+//    }
 
-        // User can optionally provide metadata with the file
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        optionalMetadata.ifPresent(map -> {
-            if (!map.isEmpty()) {
-                map.forEach((key, value) -> objectMetadata.addUserMetadata(key, value));
-            }
-        });
-
+    // Download a specific object from the bucket as a byte array (image)
+    public byte[] download(String path, String key) {
         try {
-            s3.putObject(filepath, filename, inputStream, objectMetadata);
-        } catch (AmazonServiceException e) {
-            throw new IllegalStateException("Failed to upload content to s3.", e);
+            S3Object object = s3.getObject(path, key);
+            return IOUtils.toByteArray(object.getObjectContent());
+        } catch (AmazonServiceException | IOException e) {
+            throw new IllegalStateException("Failed to download file from s3", e);
         }
     }
 
+    // Get a summary of all bucket items
+    public List<S3ObjectSummary> getBucketItems(String bucketName) {
+        ObjectListing listing = s3.listObjects(bucketName);
+        List<S3ObjectSummary> summaries = listing.getObjectSummaries();
+
+
+        while (listing.isTruncated()) {
+            listing = s3.listNextBatchOfObjects (listing);
+            summaries.addAll (listing.getObjectSummaries());
+        }
+
+        return summaries;
+    }
+
+    public Map<String, Map<String, String>> getBucketMetadata(String bucketName) {
+        // Imitates a JSON nested structure
+        //  String: filename
+        //      Map<String, String>: key (brand/item-name/price), value pairs
+        Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
+
+        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+                .withBucketName(bucketName);
+        ObjectListing objectListing;
+        do {
+            objectListing = s3.listObjects(listObjectsRequest);
+            for (S3ObjectSummary objectSummary
+                    : objectListing.getObjectSummaries()) {
+
+                String imageKey = objectSummary.getKey();
+
+                /** To get user defined metadata **/
+                ObjectMetadata objectMetadata = s3.getObjectMetadata(BucketName.PROFILE_IMAGE.getBucketName(), imageKey);
+                Map userMetadataMap = objectMetadata.getUserMetadata(); // Brand, item-name, price
+                map.put(imageKey, userMetadataMap);
+
+            }
+            listObjectsRequest.setMarker(objectListing.getNextMarker());
+        } while (objectListing.isTruncated());
+
+        return map;
+    }
 }
