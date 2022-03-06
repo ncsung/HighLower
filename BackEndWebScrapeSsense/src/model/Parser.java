@@ -8,10 +8,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
+
+import static java.lang.Integer.parseInt;
 
 public class Parser {
 
@@ -51,14 +54,41 @@ public class Parser {
         Elements products = document.getElementsByClass("plp-products__column");
 
         for (Element product: products) {
+            // From the <script> tag
             String jsonString = String.valueOf(product.select("script"));
             jsonString = jsonString.replace("<script type=\"application/ld+json\">", "");
             jsonString = jsonString.replace("</script>","");
 
             JSONObject jsonProduct = new JSONObject(jsonString);
+
+            // Some additional product info in the html
+            Element productInfo = product.select("a").get(0);
+            String htmlString = productInfo.select("span").toString();
+            String lines[] = htmlString.split("\\r?\\n");
+
+            JSONObject nestedJsonObject = new JSONObject();
+
+            if (lines.length == 3) {
+                // Line 0 is brand
+                String brand = htmlSpanToJson(lines, 0);
+
+                // Line 1 is item name
+                String item = htmlSpanToJson(lines, 1);
+
+                // Line 2 is price
+                String price = htmlSpanToJson(lines, 2);
+
+                nestedJsonObject.put("scraped-brand", brand);
+                nestedJsonObject.put("scraped-item-name", item);
+                nestedJsonObject.put("scraped-price", parseInt(price));
+                jsonProduct.put("scraped", nestedJsonObject);
+            }
+
             jsonArray.put(jsonProduct);
 
         }
+
+
 
         jsonObject.put("products", jsonArray);
         System.out.println(jsonObject.toString());
@@ -80,18 +110,70 @@ public class Parser {
         return contentBuilder.toString();
     }
 
-    public void parseJson() throws IOException {
+    public void parseJson() throws IOException, InterruptedException {
         Parser parser = new Parser();
 
         String jsonData = parser.readFile("ssense.json");
         JSONObject obj = new JSONObject(jsonData);
         JSONArray jsonArray = obj.getJSONArray("products");
 
-        for (int i = 0; i < jsonArray.length(); i++) {
+        String BASE_URL = "https://www.ssense.com/en-ca";
+
+//        for (int i = 0; i < jsonArray.length(); i++) {
+        for (int i = 0; i < 4; i++) {
             JSONObject explorObject = jsonArray.getJSONObject(i);
 
             // All the image links in the JSON file
-            System.out.println(explorObject.getString("image"));
+            String brand_name = explorObject.getJSONObject("scraped").getString("scraped-brand");
+            String item_name  = explorObject.getJSONObject("scraped").getString("scraped-item-name");
+            int price         = explorObject.getJSONObject("scraped").getInt("scraped-price");
+            String product_id = explorObject.getString("productID");
+            String img_url    = explorObject.getString("image");
+            String item_url   = BASE_URL + explorObject.getString("url");
+
+            System.out.println("Brand: " + brand_name);
+            System.out.println("Item: " + item_name);
+            System.out.println("Price: " + price);
+            System.out.println("ProductID: " + product_id);
+            System.out.println("Image: " + img_url);
+            System.out.println("URL: " + item_url);
+            System.out.println("================================");
+
+            parser.saveImage(img_url, item_name + "_" + product_id + ".jpg");
+
+            // Pause for 2 seconds
+            Thread.sleep(2000);
         }
+    }
+
+//    public void saveImage() throws IOException {
+//        String imageUrl = "https://img.ssensemedia.com/images/221735M191001_1/craig-green-undefined.jpg";
+//        String destinationFile = "image.jpg";
+//
+//        saveImage(imageUrl, destinationFile);
+//    }
+
+    public void saveImage(String imageUrl, String destinationFile) throws IOException {
+        URL url = new URL(imageUrl);
+        InputStream is = url.openStream();
+        OutputStream os = new FileOutputStream(destinationFile);
+
+        byte[] b = new byte[2048];
+        int length;
+
+        while ((length = is.read(b)) != -1) {
+            os.write(b, 0, length);
+        }
+
+        is.close();
+        os.close();
+    }
+
+    private String htmlSpanToJson(String lines[], int index) {
+        String line;
+        line = lines[index].substring(lines[index].indexOf(">")+1, lines[index].indexOf("</span>"));
+        line = line.trim();
+        line = line.replace("$", "");
+        return line;
     }
 }
