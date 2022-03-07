@@ -3,10 +3,13 @@
   <component name="ChangeListManager">
     <list default="true" id="838fdfb0-b60d-4c1f-8b1f-1114aaacb4e8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/BackEndWebScrapeSsense/model/scrape.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/BackEndWebScrapeSsense/model/scrape.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Parser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/scrape.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/scrape.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ssense.json" beforeDir="false" afterPath="$PROJECT_DIR$/ssense.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/SsenseHigherLowerApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/SsenseHigherLowerApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/filestore/FileStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/filestore/FileStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,8 +38,8 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../api" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="settings.editor.selected.configurable" value="org.infernus.idea.checkstyle.CheckStyleConfigurable" />
@@ -89,6 +92,15 @@
     </option>
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/model/Parser.java</url>
+          <line>155</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
         <watch expression="document" language="JAVA" />

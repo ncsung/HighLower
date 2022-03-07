@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 @Service
@@ -21,37 +22,28 @@ public class FileStore {
         this.s3 = s3;
     }
 
-//    public void save(String filepath,
-//                     String filename,
-//                     Optional<Map<String, String>> optionalMetadata,
-//                     InputStream inputStream) {
-//
-//        // User can optionally provide metadata with the file
-//        ObjectMetadata objectMetadata = new ObjectMetadata();
-//        optionalMetadata.ifPresent(map -> {
-//            if (!map.isEmpty()) {
-//                map.forEach((key, value) -> objectMetadata.addUserMetadata(key, value));
-//            }
-//        });
-//
-//        try {
-//            s3.putObject(filepath, filename, inputStream, objectMetadata);
-//        } catch (AmazonServiceException e) {
-//            throw new IllegalStateException("Failed to upload content to s3.", e);
-//        }
-//    }
-
-    // Download a specific object from the bucket as a byte array (image)
-    public byte[] download(String path, String key) {
+    /**
+     * Download a specific object from the bucket as a byte array (image)
+     *
+     * @param bucketName - s3 bucket name
+     * @param key - {s3-image-file-key}/image/download
+     * @return the image from s3
+     */
+    public byte[] download(String bucketName, String key) {
         try {
-            S3Object object = s3.getObject(path, key);
+            S3Object object = s3.getObject(bucketName, key);
             return IOUtils.toByteArray(object.getObjectContent());
         } catch (AmazonServiceException | IOException e) {
             throw new IllegalStateException("Failed to download file from s3", e);
         }
     }
 
-    // Get a summary of all bucket items
+    /**
+     * Get a summary of all bucket items
+     *
+     * @param bucketName - s3 bucket name
+     * @return a list of all items in the s3 bucket
+     */
     public List<S3ObjectSummary> getBucketItems(String bucketName) {
         ObjectListing listing = s3.listObjects(bucketName);
         List<S3ObjectSummary> summaries = listing.getObjectSummaries();
@@ -65,6 +57,12 @@ public class FileStore {
         return summaries;
     }
 
+    /**
+     * Get the metadata of all bucket items
+     *
+     * @param bucketName - s3 bucket name
+     * @return a JSON-like nested structure with items and their metadata
+     */
     public Map<String, Map<String, String>> getBucketMetadata(String bucketName) {
         // Imitates a JSON nested structure
         //  String: filename
@@ -91,5 +89,32 @@ public class FileStore {
         } while (objectListing.isTruncated());
 
         return map;
+    }
+
+    /**
+     *
+     * @param filepath
+     * @param filename
+     * @param optionalMetadata
+     * @param inputStream
+     */
+    public void save(String filepath,
+                 String filename,
+                 Optional<Map<String, String>> optionalMetadata,
+                 InputStream inputStream) {
+
+        // User can optionally provide metadata with the file
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        optionalMetadata.ifPresent(map -> {
+            if (!map.isEmpty()) {
+                map.forEach((key, value) -> objectMetadata.addUserMetadata(key, value));
+            }
+        });
+
+        try {
+            s3.putObject(filepath, filename, inputStream, objectMetadata);
+        } catch (AmazonServiceException e) {
+            throw new IllegalStateException("Failed to upload content to s3.", e);
+        }
     }
 }

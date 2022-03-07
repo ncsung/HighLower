@@ -4,13 +4,19 @@ import "./App.css"
 
 const Products = ({images}) => {
 
+
   return (
     <div>
 
-      {images.map(image => {
+      {Object.keys(images).map(image_key => {
         return (
-          <img src={`http://localhost:8080/api/test/${image.key}/image/download`}
-               key = {image.key}/>
+          <>
+          <img src={`http://localhost:8080/api/items/${image_key}/image/download`}
+            key={image_key} />
+            <h1> {images[image_key]['brand']} </h1>
+            <p> {images[image_key]['item-name']} </p>
+            <p> {images[image_key]['price']} </p>
+            </>
         )
       })}
 

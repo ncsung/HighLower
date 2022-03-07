@@ -5,9 +5,12 @@ import com.stormhacks22.ssensehigherlower.bucket.BucketName;
 import com.stormhacks22.ssensehigherlower.filestore.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+
+import static org.apache.http.entity.ContentType.*;
 
 @Service
 public class HigherLowerService {
@@ -32,5 +35,53 @@ public class HigherLowerService {
 
     public Map<String, Map<String, String>> getBucketMetadata() {
         return fileStore.getBucketMetadata(BucketName.PROFILE_IMAGE.getBucketName());
+    }
+
+    public void uploadProduct(String brand, String productName, int price, MultipartFile file) {
+        // 1. Check if image is not empty
+        isFileEmpty(file);
+
+        // 2. If file is an image
+        isImage(file);
+
+        // 3. Metadata to associate with the item
+        Map<String, String> metadata = extractMetadata(brand, productName, price, file);
+
+        // 4. Store the image in s3
+        String path = BucketName.PROFILE_IMAGE.getBucketName();
+        String filename = file.getOriginalFilename();
+
+        try {
+            fileStore.save(path, filename, Optional.of(metadata), file.getInputStream());
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+
+
+    }
+
+    private void isFileEmpty(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalStateException("Cannot upload empty file [ " + file.getSize() + "]");
+        }
+    }
+
+    private void isImage(MultipartFile file) {
+        if (!Arrays.asList(
+                IMAGE_JPEG.getMimeType(),
+                IMAGE_PNG.getMimeType(),
+                IMAGE_GIF.getMimeType()).contains(file.getContentType())) {
+            throw new IllegalStateException("File must be an image [" + file.getContentType() + "]");
+        }
+    }
+
+    private Map<String, String> extractMetadata(String brand, String productName, int price, MultipartFile file) {
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("brand", brand);
+        metadata.put("item-name", productName);
+        metadata.put("price", String.valueOf(price));
+        metadata.put("Content-Type", file.getContentType());
+        metadata.put("Content-Length", String.valueOf(file.getSize()));
+        return metadata;
     }
 }
