@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="838fdfb0-b60d-4c1f-8b1f-1114aaacb4e8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_codec_commons_codec_1_11.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__commons_logging_commons_logging_1_2.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_httpcomponents_httpclient_4_5_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_httpcomponents_httpcore_4_4_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_apache_httpcomponents_httpmime_4_5_13.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/Maven__org_imgscalr_imgscalr_lib_4_2.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/scrape.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/scrape.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/SsenseHigherLowerApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/SsenseHigherLowerApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/filestore/FileStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/filestore/FileStore.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BackEndWebScrapeSsense.iml" beforeDir="false" afterPath="$PROJECT_DIR$/BackEndWebScrapeSsense.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/BackEndWebScrapeSsense/model/Parser.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/BackEndWebScrapeSsense/model/scrape.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/scrape.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/model/scrape.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../api/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../api/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/java/com/stormhacks22/ssensehigherlower/requests/HigherLowerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../api/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../api/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,8 +40,23 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="useMavenConfig" value="true" />
+      </MavenGeneralSettings>
+    </option>
   </component>
   <component name="ProjectId" id="25P4qKIubcZxU5sxg3xodzgoZ7N" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -38,6 +67,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../api" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.0" />
@@ -95,7 +125,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/model/Parser.java</url>
+          <url>file://$PROJECT_DIR$/src/main/java/model/Parser.java</url>
           <line>155</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>

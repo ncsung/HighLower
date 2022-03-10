@@ -37,7 +37,7 @@ public class HigherLowerService {
         return fileStore.getBucketMetadata(BucketName.PROFILE_IMAGE.getBucketName());
     }
 
-    public void uploadProduct(String brand, String productName, int price, MultipartFile file) {
+    public void uploadProduct(String productId, String brand, String productName, int price, MultipartFile file) {
         // 1. Check if image is not empty
         isFileEmpty(file);
 
@@ -45,7 +45,7 @@ public class HigherLowerService {
         isImage(file);
 
         // 3. Metadata to associate with the item
-        Map<String, String> metadata = extractMetadata(brand, productName, price, file);
+        Map<String, String> metadata = extractMetadata(productId, brand, productName, price, file);
 
         // 4. Store the image in s3
         String path = BucketName.PROFILE_IMAGE.getBucketName();
@@ -75,8 +75,9 @@ public class HigherLowerService {
         }
     }
 
-    private Map<String, String> extractMetadata(String brand, String productName, int price, MultipartFile file) {
+    private Map<String, String> extractMetadata(String productId, String brand, String productName, int price, MultipartFile file) {
         Map<String, String> metadata = new HashMap<>();
+        metadata.put("product-id", productId);
         metadata.put("brand", brand);
         metadata.put("item-name", productName);
         metadata.put("price", String.valueOf(price));

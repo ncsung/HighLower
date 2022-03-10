@@ -1,5 +1,16 @@
 package model;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.imgscalr.Scalr;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -7,24 +18,26 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.stream.Stream;
 
 import static java.lang.Integer.parseInt;
 
 public class Parser {
 
+    /**
+     * Grabs the html file associated with "https://www.ssense.com/en-ca/men/clothing" and saves HTML to disk
+     * at "ssense.html"
+     * @throws IOException
+     */
     public void scrape() throws IOException {
         final String url =
                 "https://www.ssense.com/en-ca/men/clothing";
@@ -44,13 +57,18 @@ public class Parser {
                 .timeout(6000)
                 .get();
 
-        BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ssense.html"), "UTF-8"));
-        System.out.println("\n" + document.outerHtml());
+        BufferedWriter htmlWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ssense.html"), StandardCharsets.UTF_8));
+//        System.out.println("\n" + document.outerHtml());
         htmlWriter.write(document.toString());
         htmlWriter.flush();
         htmlWriter.close();
     }
 
+    /**
+     * Grabs "ssense.html" from the disk, parses it for information including brand, product name, id and price,
+     * saves to disk as "ssense.json"
+     * @throws IOException
+     */
     public void htmlToJson() throws IOException {
         JSONObject jsonObject = new JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -71,7 +89,7 @@ public class Parser {
             // Some additional product info in the html
             Element productInfo = product.select("a").get(0);
             String htmlString = productInfo.select("span").toString();
-            String lines[] = htmlString.split("\\r?\\n");
+            String[] lines = htmlString.split("\\r?\\n");
 
             JSONObject nestedJsonObject = new JSONObject();
 
@@ -95,10 +113,8 @@ public class Parser {
 
         }
 
-
-
         jsonObject.put("products", jsonArray);
-        System.out.println(jsonObject.toString());
+//        System.out.println(jsonObject.toString());
 
         BufferedWriter jsonWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("ssense.json"), "UTF-8"));
         jsonWriter.write(jsonObject.toString());
@@ -106,7 +122,13 @@ public class Parser {
         jsonWriter.close();
     }
 
-    // EFFECTS: reads source file as string and returns it
+    /**
+     * Helper function that reads source file line by line and returns it as a string
+     * @param source - name of file on disk
+     * @return
+     * @throws IOException
+     * SOURCE: http://www.java2s.com/example/java-utility-method/path-file-read-nio/readlinebyline-string-filepath-a2b36.html
+     */
     public String readFile(String source) throws IOException {
         StringBuilder contentBuilder = new StringBuilder();
 
@@ -117,17 +139,21 @@ public class Parser {
         return contentBuilder.toString();
     }
 
+    /**
+     * Opens the image links that were parses and saves to the disk
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void parseJson() throws IOException, InterruptedException {
-        Parser parser = new Parser();
 
-        String jsonData = parser.readFile("ssense.json");
+        String jsonData = readFile("ssense.json");
         JSONObject obj = new JSONObject(jsonData);
         JSONArray jsonArray = obj.getJSONArray("products");
 
         String BASE_URL = "https://www.ssense.com/en-ca";
 
-//        for (int i = 0; i < jsonArray.length(); i++) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < jsonArray.length(); i++) {
+//        for (int i = 0; i < 4; i++) {
             JSONObject explorObject = jsonArray.getJSONObject(i);
 
             // All the image links in the JSON file
@@ -146,20 +172,19 @@ public class Parser {
             System.out.println("URL: " + item_url);
             System.out.println("================================");
 
-            parser.saveImage(img_url, item_name + "_" + product_id + ".jpg");
+            saveImage(img_url, item_name + "_" + product_id + ".jpg");
 
             // Pause for 2 seconds
             Thread.sleep(2000);
         }
     }
 
-//    public void saveImage() throws IOException {
-//        String imageUrl = "https://img.ssensemedia.com/images/221735M191001_1/craig-green-undefined.jpg";
-//        String destinationFile = "image.jpg";
-//
-//        saveImage(imageUrl, destinationFile);
-//    }
-
+    /**
+     * Downloads the image from the web and saves it
+     * @param imageUrl - web URL
+     * @param destinationFile - saved file name
+     * @throws IOException
+     */
     public void saveImage(String imageUrl, String destinationFile) throws IOException {
         URL url = new URL(imageUrl);
         InputStream is = url.openStream();
@@ -176,36 +201,60 @@ public class Parser {
         os.close();
     }
 
+
+    /**
+     * Resizes a given image and performs a POST request to the s3 bucket
+     * @throws IOException
+     */
+    public void compressAndPost() throws IOException {
+        // SOURCE: https://stackoverflow.com/questions/44565500/how-can-i-compress-images-using-java
+        // Read file
+        File input = new File("Green Knot Jumper_8893741.jpg");
+        BufferedImage image = ImageIO.read(input); // This can read an input stream (without needing to write/read from disk?)
+
+        // Compress file
+        BufferedImage scaledImage = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY,image.getWidth(), image.getHeight());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(scaledImage, "jpg", baos);
+        byte[] bytes = baos.toByteArray();
+
+
+        // POST file
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+            String api = "http://localhost:8080/api/items/Craig Green/Green Knot Jumper-test2/123/image/upload";
+            URI uri = new URI(api.replace(" ", "%20"));
+            HttpPost httpPost = new HttpPost(uri);
+            ContentBody cbFile = new ByteArrayBody(bytes, ContentType.create("image/jpeg"),"blahblahblah.jpg");
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+            builder.addPart("file", cbFile);
+
+            HttpEntity entity = builder.build();
+            httpPost.setEntity(entity);
+            System.out.println("executing request " + httpPost.getRequestLine());
+            HttpResponse response = httpClient.execute(httpPost);
+            System.out.println(response.getStatusLine());
+
+        } catch (IOException e) {
+
+            // handle
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Customer helper for parsing the ssense.html file
+     * @param lines - string array
+     * @param index - index of string array
+     * @return - the extracted JSON formatted information from the HTML file
+     */
     private String htmlSpanToJson(String lines[], int index) {
         String line;
         line = lines[index].substring(lines[index].indexOf(">")+1, lines[index].indexOf("</span>"));
         line = line.trim();
         line = line.replace("$", "");
         return line;
-    }
-
-    public void compress() throws IOException {
-        // SOURCE: https://stackoverflow.com/questions/44565500/how-can-i-compress-images-using-java
-        File input = new File("Green Knot Jumper_8893741.jpg");
-        BufferedImage image = ImageIO.read(input);
-
-        File compressedImageFile = new File("compressed_image.jpg");
-        OutputStream os = new FileOutputStream(compressedImageFile);
-
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
-        ImageWriter writer = (ImageWriter) writers.next();
-
-        ImageOutputStream ios = ImageIO.createImageOutputStream(os);
-        writer.setOutput(ios);
-
-        ImageWriteParam param = writer.getDefaultWriteParam();
-
-        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(0.45f);  // Change the quality value you prefer
-        writer.write(null, new IIOImage(image, null, null), param);
-
-        os.close();
-        ios.close();
-        writer.dispose();
     }
 }

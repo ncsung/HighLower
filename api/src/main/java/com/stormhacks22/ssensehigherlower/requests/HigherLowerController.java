@@ -37,13 +37,21 @@ public class HigherLowerController {
     }
 
     @PostMapping(
-            path = "{brand}/{product-name}/{price}/image/upload"
+            path = "{product-id}/{brand}/{product-name}/{price}/image/upload"
     )
-    public void uploadProduct(@PathVariable("brand") String brand,
+    public void uploadProduct(@PathVariable("product-id") String productId,
+                              @PathVariable("brand") String brand,
                               @PathVariable("product-name") String productName,
                               @PathVariable("price") int price,
                               @RequestParam("file") MultipartFile file) {
-        higherLowerService.uploadProduct(brand, productName, price, file);
+        System.out.println("=============");
+        System.out.println(productId);
+        System.out.println(brand);
+        System.out.println(productName);
+        System.out.println(price);
+        System.out.println(file.getContentType());
+        System.out.println("=============");
+        higherLowerService.uploadProduct(productId,brand, productName, price, file);
     }
 
 
