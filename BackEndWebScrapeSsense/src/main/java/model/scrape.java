@@ -39,63 +39,70 @@ public class scrape {
 
         String BASE_URL = "https://www.ssense.com/en-ca";
 
-        int i = 9;
-        JSONObject explorObject = jsonArray.getJSONObject(i);
 
-        // All the image links in the JSON file
-        String brand_name = explorObject.getJSONObject("scraped").getString("scraped-brand");
-        String item_name  = explorObject.getJSONObject("scraped").getString("scraped-item-name");
-        int price         = explorObject.getJSONObject("scraped").getInt("scraped-price");
-        String product_id = explorObject.getString("productID");
-        String img_url    = explorObject.getString("image");
-        String item_url   = BASE_URL + explorObject.getString("url");
+        for (int i = 20; i < 35; i++) {
+            JSONObject explorObject = jsonArray.getJSONObject(i);
 
-        System.out.println("Brand: " + brand_name);
-        System.out.println("Item: " + item_name);
-        System.out.println("Price: " + price);
-        System.out.println("ProductID: " + product_id);
-        System.out.println("Image: " + img_url);
-        System.out.println("URL: " + item_url);
-        System.out.println("================================");
+            // All the image links in the JSON file
+            String brand_name = unescapeHtmlChars(explorObject.getJSONObject("scraped").getString("scraped-brand"));
+            String item_name = unescapeHtmlChars(explorObject.getJSONObject("scraped").getString("scraped-item-name"));
+            int price = explorObject.getJSONObject("scraped").getInt("scraped-price");
+            String product_id = explorObject.getString("productID");
+            String img_url = explorObject.getString("image");
+            String item_url = BASE_URL + explorObject.getString("url");
 
-        // saveImage
-        URL url = new URL(img_url);
-        InputStream is = url.openStream();
+//            System.out.println("Brand: " + brand_name);
+//            System.out.println("Item: " + item_name);
+//            System.out.println("Price: " + price);
+//            System.out.println("ProductID: " + product_id);
+//            System.out.println("Image: " + img_url);
+//            System.out.println("URL: " + item_url);
+//            System.out.println("================================");
+//
+//            // saveImage
+//            URL url = new URL(img_url);
+//            InputStream is = url.openStream();
+//
+//            // compressAndPost
+//            BufferedImage image = ImageIO.read(is); // This can read an input stream (without needing to write/read from disk?)
+//
+//            // Compress file
+//            BufferedImage scaledImage = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY,image.getWidth(), image.getHeight());
+//            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//            ImageIO.write(scaledImage, "jpg", baos);
+//            byte[] bytes = baos.toByteArray();
 
-        // compressAndPost
-        BufferedImage image = ImageIO.read(is); // This can read an input stream (without needing to write/read from disk?)
+            try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+                String filename = brand_name.replace(" ", "-") + "_" + item_name.replace(" ", "-") + "_" + product_id + ".jpg";
+                System.out.println(filename);
+//                String api = "http://localhost:8080/api/items/"+ product_id + "/" + brand_name +"/" + item_name +"/"+price+"/image/upload";
+//                URI uri = new URI(api.replace(" ", "%20"));
+//                HttpPost httpPost = new HttpPost(uri);
+//                ContentBody cbFile = new ByteArrayBody(bytes, ContentType.create("image/jpeg"),filename);
+//                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+//                builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+//                builder.addPart("file", cbFile);
+//
+//                HttpEntity entity = builder.build();
+//                httpPost.setEntity(entity);
+//                System.out.println("executing request " + httpPost.getRequestLine());
+//                HttpResponse response = httpClient.execute(httpPost);
+//                System.out.println(response.getStatusLine());
+//
+//            } catch (IOException e) {
+//
+//                // handle
+//
+//            } catch (URISyntaxException e) {
+//                e.printStackTrace();
+//            }
 
-        // Compress file
-        BufferedImage scaledImage = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY,image.getWidth(), image.getHeight());
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(scaledImage, "jpg", baos);
-        byte[] bytes = baos.toByteArray();
+//            // Pause for 2.5 seconds
+//            Thread.sleep(2500);
+            }
 
-        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
-            String filename = item_name + "_" + product_id + ".jpg";
-            String api = "http://localhost:8080/api/items/"+ product_id + "/" + brand_name +"/" + item_name +"/"+price+"/image/upload";
-            URI uri = new URI(api.replace(" ", "%20"));
-            HttpPost httpPost = new HttpPost(uri);
-            ContentBody cbFile = new ByteArrayBody(bytes, ContentType.create("image/jpeg"),filename);
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-            builder.addPart("file", cbFile);
 
-            HttpEntity entity = builder.build();
-            httpPost.setEntity(entity);
-            System.out.println("executing request " + httpPost.getRequestLine());
-            HttpResponse response = httpClient.execute(httpPost);
-            System.out.println(response.getStatusLine());
-
-        } catch (IOException e) {
-
-            // handle
-
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
-
-
     }
 
 
@@ -107,6 +114,10 @@ public class scrape {
         }
 
         return contentBuilder.toString();
+    }
+
+    public static String unescapeHtmlChars (String str) {
+        return org.jsoup.parser.Parser.unescapeEntities(str, true);
     }
 }
 
