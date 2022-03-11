@@ -16,6 +16,7 @@ import java.util.*;
 public class FileStore {
 
     private final AmazonS3 s3;
+    private static Map<String, Map<String, String>> productMap;
 
     @Autowired
     public FileStore(AmazonS3 s3) {
@@ -64,6 +65,7 @@ public class FileStore {
      * @return a JSON-like nested structure with items and their metadata
      */
     public Map<String, Map<String, String>> getBucketMetadata(String bucketName) {
+        // TODO: figure out a better way to get a random image
         // Imitates a JSON nested structure
         //  String: filename
         //      Map<String, String>: key (brand/item-name/price), value pairs
@@ -87,6 +89,9 @@ public class FileStore {
             }
             listObjectsRequest.setMarker(objectListing.getNextMarker());
         } while (objectListing.isTruncated());
+
+        // Allocate a static productMap that gets generated once, and then use this to get a random key
+        productMap = map;
 
         return map;
     }
